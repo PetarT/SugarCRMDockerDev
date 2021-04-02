@@ -1,0 +1,37 @@
+version: "3.8"
+services:
+  web-server:
+    build:
+      dockerfile: php.Dockerfile
+      context: .
+    restart: always
+    volumes:
+      - "./www/:/var/www/html/"
+    ports:
+      - "80:80"
+  mysql-server:
+    image: mysql:5.7.33
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: YOUR_PASS
+    volumes:
+      - "./data:/var/lib/mysql"
+      - "./conf/mysql/:/etc/mysql/conf.d/"
+      - "./dumps/:/home/dumps/"
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.0.2
+    restart: always
+    environment:
+      PMA_HOST: mysql-server
+      PMA_USER: root
+      PMA_PASSWORD: YOUR_PASS
+    ports:
+      - "5000:80"
+  elasticsearch:
+    image: elasticsearch:6.8.14
+    restart: always
+    ports:
+      - "9200:9200"

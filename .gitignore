@@ -1,0 +1,9 @@
+/clients-data
+/data/**
+!/data/.gitkeep 
+/dumps/**
+!/dumps/.gitkeep 
+/www/**
+!/www/.gitkeep 
+desktop.ini
+/.idea/
