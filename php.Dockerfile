@@ -1,6 +1,10 @@
 FROM php:7.3.27-apache
 
-RUN apt-get update && apt-get install -y bash nano coreutils libc-client-dev libkrb5-dev libpng-dev libsodium-dev libgmp-dev libzip-dev libargon2-dev libxml2-dev && rm -r /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y wget bash nano coreutils libc-client-dev libkrb5-dev libpng-dev libsodium-dev libgmp-dev libzip-dev libargon2-dev libxml2-dev && rm -r /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -y xvfb xauth xfonts-base xfonts-75dpi fontconfig
+
+RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb && apt install -y ./wkhtmltox_0.12.6-1.buster_amd64.deb 
 
 RUN docker-php-ext-install mysqli pdo pdo_mysql gd bcmath gmp xml xmlrpc zip sodium
 
