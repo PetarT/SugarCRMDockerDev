@@ -2,5 +2,18 @@
 sql-mode="STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION"
 max_allowed_packet=1024M
 #innodb_force_recovery=1
-key_buffer_size=1024M
-read_buffer_size=10M
+read_buffer_size=12M
+connect_timeout=60
+net_read_timeout=300
+net_write_timeout=300
+max_connections=200
+query_cache_size=16M
+key_buffer_size=256M
+innodb_buffer_pool_size = 4G
+innodb_log_buffer_size = 256M
+innodb_log_file_size = 1G
+innodb_write_io_threads = 16
+innodb_flush_log_at_trx_commit = 0
+
+[mysqldump]
+max_allowed_packet=1024M

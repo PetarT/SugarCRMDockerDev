@@ -10,6 +10,7 @@ services:
       - "./conf/apache/sites-available/:/etc/apache2/sites-available/"
     ports:
       - "80:80"
+
   mysql-server:
     image: mysql:5.7.33
     restart: always
@@ -17,10 +18,16 @@ services:
       MYSQL_ROOT_PASSWORD: YOUR_PASS
     volumes:
       - "./data:/var/lib/mysql"
-      - "./conf/mysql/:/etc/mysql/conf.d/"
       - "./dumps/:/home/dumps/"
     ports:
       - "3306:3306"
+    secrets:
+      - source: custom
+        target: /etc/mysql/conf.d/custom.cnf
+      - source: mysql-cli
+        target: /home/.config/mysql-cli.cnf
+      - source: importDb
+        target: /bin/importDb
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:5.0.2
@@ -31,8 +38,24 @@ services:
       PMA_PASSWORD: YOUR_PASS
     ports:
       - "5000:80"
+
   elasticsearch:
     image: elasticsearch:6.8.14
+    platform: linux
+    container_name: elasticsearch
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=false
+      - "ES_JAVA_OPTS=-Xms1500m -Xmx1500m"
+      - discovery.type=single-node
+    mem_limit: 2g
     restart: always
     ports:
       - "9200:9200"
+secrets:
+    custom:
+        file: ./conf/mysql/custom.cnf
+    mysql-cli:
+        file: ./conf/mysql/mysql-cli.cnf
+    importDb:
+        file: ./bin/importDb

@@ -1,0 +1,4 @@
+[client]
+user = "root"
+password = "YOUR_PASS"
+host = "mysql-server"
