@@ -1,0 +1,72 @@
+#!/bin/bash
+
+while getopts "d:h" option; do
+        case $option in
+            d)
+                DATABASE=$OPTARG
+                ;;
+            h)
+                echo "Usage: dbExport -d DATABASE_NAME\nFiles will be placed under /home/dumps/backups/ named like `DATABASE_NAME_lite/full_Y_m_d.sql`"
+                ;;
+        esac
+done
+
+DB_FILE="`date +%Y_%m_%d`.sql"
+MYSQL_LOGIN_CNF="/home/.config/mysql-cli.cnf"
+EXCLUDED_TABLES=(
+"activities"
+"activities_users"
+"quickbooks_inte_history_raw_log"
+"fbsg_qb_sync_log"
+"accounts_audit"
+"cases_audit"
+"tasks_audit"
+"audit_events"
+"meetings_audit"
+"dri_subworkflows_audit"
+"fbsg_qb_invoicelines_audit"
+"intws_workstreams_audit"
+"dri_workflows_audit"
+"intsi_soft_invoice_audit"
+"opportunities_audit"
+"fbsg_qb_invoices_audit"
+"job_queue"
+"mim_material_invoice_audit"
+"accounts_audit"
+"notifications"
+"notifications_audit"
+"notifications_cstm"
+)
+
+echo "Run full backup? (y/n)"
+read -n 1 ans
+echo ""
+IGNORED_TABLES_STRING=''
+PREFIX=''
+
+if [[ $ans == 'n' ]] || [[ $ans == 'N' ]]; then
+    for TABLE in "${EXCLUDED_TABLES[@]}"
+    do :
+       IGNORED_TABLES_STRING+=" --ignore-table=${DATABASE}.${TABLE}"
+    done
+    PREFIX+='lite'
+    echo 'Starting partial export DB process...'
+else
+    echo 'Running full DB export process...'
+    PREFIX+='full'
+fi
+
+echo 'Dumping structure first...'
+mysqldump --defaults-extra-file=$MYSQL_LOGIN_CNF --single-transaction --no-data --no-tablespaces ${DATABASE} > /home/dumps/backups/${DATABASE}_${PREFIX}_${DB_FILE}
+echo 'Dumping content data...'
+mysqldump --defaults-extra-file=$MYSQL_LOGIN_CNF ${DATABASE} --no-create-info --insert-ignore --no-tablespaces --skip-triggers ${IGNORED_TABLES_STRING} >> /home/dumps/backups/${DATABASE}_${PREFIX}_${DB_FILE}
+echo 'Export completed!'
+echo 'Starting compressing exported file...'
+CURRENT_LOCATION=`pwd`
+cd /home/dumps/backups/
+tar --create --gzip --file ${DATABASE}_${PREFIX}_${DB_FILE}.tar.gz ${DATABASE}_${PREFIX}_${DB_FILE}
+echo 'DB Export & Compress done!'
+echo 'Removing SQL file...'
+rm ${DATABASE}_${PREFIX}_${DB_FILE}
+cd ${CURRENT_LOCATION}
+echo 'All done and file is ready for download! File location: "'`readlink -f /home/dumps/backups/${DATABASE}_${PREFIX}_${DB_FILE}.tar.gz`'"'
